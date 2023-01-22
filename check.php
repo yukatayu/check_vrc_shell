@@ -15,6 +15,7 @@ $uid_list = [
 $sleep_batch = 300;
 $sleep_user  =  20;
 $webhook = 'https://discord.com/api/webhooks/1**********/_**********';
+$max_error = 5;
 
 // -+-+-+-+-+-+-+-+-+-+- //
 // API
@@ -76,6 +77,7 @@ function render($user){
 
 $notified = [];
 $status = [];
+$error_count = 0;
 
 
 // -+-+-+-+-+-+-+-+-+-+- //
@@ -92,7 +94,9 @@ for(;;){
 		|| !isset($user['location'])
 		){
 			$status[] = "\e[31mError\e[0m {$uid}";
+			++$error_count;
 		}else{
+			$error_count = 0;
 			$status[] = render($user);
 			$online = ($user['state'] == 'online');
 			if($online)
@@ -109,6 +113,8 @@ for(;;){
 	foreach($status as $s)
 		print("{$s}\n");
 	print("--------------------\n");
+	if($error_count >= $max_error)
+		die("error_count ({$error_count}) exceeded $max_error (${max_error})\n");
 	sleep($sleep_batch);
 }
 
